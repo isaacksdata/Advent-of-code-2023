@@ -1,3 +1,4 @@
+from math import prod
 from typing import Dict
 from typing import List
 from typing import Tuple
@@ -60,6 +61,23 @@ def solve_game(game: str, colour_limits: Dict[str, int]) -> Tuple[int, bool]:
     return game_id, True
 
 
+def calculate_game_power(game: str) -> int:
+    """
+    The power of the game is the product of the minimum number of balls of each colour required to make the game
+    possible
+    :param game: game string
+    :return: power of the game
+    """
+    turns = split_turns(game)
+    maxes = {c: 0 for c in COLOURS}
+    for turn in turns:
+        counts = count_colours(turn)
+        for c, v in counts.items():
+            if v > maxes[c]:
+                maxes[c] = v
+    return prod(maxes.values())
+
+
 def solve(data: List[str], colour_limits: Dict[str, int], part: str = "a") -> int:
     """
     Entrypoint for solving day 2
@@ -76,6 +94,7 @@ def solve(data: List[str], colour_limits: Dict[str, int], part: str = "a") -> in
                 possible_game_ids.append(i)
         return sum(possible_game_ids)
     elif part == "b":
-        return 1
+        powers = [calculate_game_power(game) for game in data]
+        return sum(powers)
     else:
         raise ValueError("Unexpected part!")
