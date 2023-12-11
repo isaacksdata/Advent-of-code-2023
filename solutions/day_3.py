@@ -1,4 +1,6 @@
+import logging
 from itertools import chain
+from math import prod
 from typing import List
 
 import numpy as np
@@ -19,23 +21,29 @@ def calc_distance(x: List[int], y: List[int]) -> int:
     return max([abs(x[0] - y[0]), (abs(x[1] - y[1]))])
 
 
-def encode_data(d: List[str]) -> np.ndarray:
+def encode_data(d: List[str], part: str = "a") -> np.ndarray:
     """
     Encode the list of strings as a numpy array with 3 numeric values
 
     numbers are encoded as 1
     periods are encoded as 0
-    other symbols are encoded as 2
+    other symbols are encoded as 2 (if part == b then only * is encoded as 2)
     :param d: input data
+    :param part: the puzzle part - a or b
     :return: encoded array
     """
     new_d = []
     for s in d:
         for n in numbers:
             s = s.replace(str(n), "1")
-        s = s.replace(".", "0")
-        s_l = list(s)
-        s_l = [i if i in ["0", "1"] else "2" for i in s_l]
+        if part == "a":
+            s = s.replace(".", "0")
+            s_l = list(s)
+            s_l = [i if i in ["0", "1"] else "2" for i in s_l]
+        else:
+            s = s.replace("*", "2")
+            s_l = list(s)
+            s_l = [i if i in ["1", "2"] else "0" for i in s_l]
         new_d.append(s_l)
     return np.asarray(new_d)
 
@@ -97,6 +105,35 @@ def extract_part_numbers(number_idx: List[List[List[int]]], encoded_data: np.nda
     return t
 
 
+def find_gears(encoded_data: np.ndarray) -> List[List[int]]:
+    """
+    Extract the co-ordinates for gears (2's) from the array
+    :param encoded_data: the encoded array
+    :return: list of co-ordinates for gears
+    """
+    return np.argwhere(encoded_data == "2").tolist()
+
+
+def calculate_gear_ratios(encoded_data: np.ndarray, orig_arr: np.ndarray) -> List[int]:
+    """
+    For each gear, calculate the gear ratio which is the product of its adjacent part numbers
+    :param encoded_data: the encoded array
+    :param orig_arr: the original data in array form
+    :return: list of gear ratios
+    """
+    gears = find_gears(encoded_data)
+    logging.info("Found %s gears!", len(gears))
+    numbers_idx = extract_number_indices(encoded_data)
+    gear_ratios = []
+    for gear in gears:
+        adjacency = [any([calc_distance(gear, s) < 2 for s in numb]) for numb in numbers_idx]
+        if adjacency.count(True) > 1:
+            adjacent_numbers = [numb for i, numb in enumerate(numbers_idx) if adjacency[i]]
+            gear_ratio = prod([int("".join([orig_arr[x[0], x[1]] for x in numb])) for numb in adjacent_numbers])
+            gear_ratios.append(gear_ratio)
+    return gear_ratios
+
+
 def solve(data: List[str], part: str = "a") -> int:
     """
     Solve the problem for day 3
@@ -104,11 +141,13 @@ def solve(data: List[str], part: str = "a") -> int:
     :param part: which part of the problem to solve - 'a' or 'b'
     :return: solution
     """
+    orig_array = to_array(data)
     if part == "a":
-        orig_array = to_array(data)
-        encoded_data = encode_data(data)
+        encoded_data = encode_data(data, part)
         number_idx = extract_number_indices(encoded_data)
         total = extract_part_numbers(number_idx, encoded_data, orig_array)
         return total
     else:
-        return 1
+        encoded_data = encode_data(data, part)
+        ratios = calculate_gear_ratios(encoded_data, orig_array)
+        return sum(ratios)
