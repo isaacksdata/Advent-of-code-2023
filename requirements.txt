@@ -7,3 +7,4 @@ mypy==1.7.1
 numpy==1.26.2
 pylint==3.0.2
 python-dotenv==1.0.0
+tqdm==4.66.1
