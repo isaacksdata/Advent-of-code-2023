@@ -1,0 +1,99 @@
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Tuple
+
+import tqdm
+
+
+def map_value(value: int, dest_start: int, source_start: int, range: int) -> Optional[int]:
+    """
+    Map the provided value from the source space to the destination space
+
+    If the value does not lie within the provided ranges then None is returned
+    :param value: input value from source space
+    :param dest_start: the start of the destination space
+    :param source_start: the start of the source space
+    :param range: the range of the source and destination spaces
+    :return: mapped value
+    """
+    if source_start <= value <= source_start + range:
+        return dest_start + (value - source_start)
+    return None
+
+
+def clean_input(data: List[str]) -> Tuple[List[int], List[str]]:
+    """
+    Clean up the input data for easier processing
+    :param data: input data
+    :return: cleand data
+    """
+    data = [x for x in data if x != ""]
+    seeds = data[0]
+    seed_ids = list(map(int, seeds.split(":")[1].split()))
+    data = data[1:]
+    return seed_ids, data
+
+
+def create_maps(data: List[str]) -> Dict[str, List[str]]:
+    """
+    Create a dictionary of maps to be used for mapping between spaces
+    :param data: input data
+    :return: a dictionary of mappings for each space transformation
+    """
+    maps: Dict[str, List[str]] = {}
+    current_map = ""
+    for i in data:
+        if "map" in i:
+            current_map = i
+            maps[current_map] = []
+        else:
+            maps[current_map].append(i)
+    return maps
+
+
+def map_seed(seed: int, maps: Dict[str, List[str]]) -> int:
+    """
+    Map seed to location by iterating over the transformations stored within maps
+    :param seed: the seed ID
+    :param maps: the dictionary of mappings
+    :return: the seed location
+    """
+    current_value = seed
+    for m, mappings in maps.items():
+        mapped_value = None
+        for mapping in mappings:
+            mapped_value = map_value(current_value, *list(map(int, mapping.split())))
+            if mapped_value is not None:
+                break
+        if mapped_value is not None:
+            current_value = mapped_value
+    return current_value
+
+
+def get_closest_location(data: List[str]) -> int:
+    """
+    Across the seeds, find the one with the smallest location value
+    :param data: input data
+    :return: smallest location
+    """
+    seeds, clean_data = clean_input(data)
+    maps = create_maps(clean_data)
+    locations = []
+    for seed in tqdm.tqdm(seeds):
+        l = map_seed(seed, maps)
+        locations.append(l)
+    return min(locations)
+
+
+def solve(data: List[str], part: str = "a") -> int:
+    """
+    Solve the problem for day 1
+    :param data: input data
+    :param part: which part of the problem to solve - 'a' or 'b'
+    :return: solution
+    """
+    if part == "a":
+        return get_closest_location(data)
+    else:
+        return 1
