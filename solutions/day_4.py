@@ -1,5 +1,6 @@
-from typing import Dict
+from functools import cache
 from typing import List
+from typing import Tuple
 
 import tqdm
 
@@ -70,10 +71,8 @@ def get_card_id(card: str) -> int:
     return int(card_id.split("Card ")[1])
 
 
-cache: Dict[int, int] = {}  # used for caching totals per card ID
-
-
-def analyse_card(card: str, original_cards: List[str]) -> int:
+@cache
+def analyse_card(card: str, original_cards: Tuple[str]) -> int:
     """
     Recursive function for getting total cards per original starter card
 
@@ -81,12 +80,10 @@ def analyse_card(card: str, original_cards: List[str]) -> int:
     analysed once
     :param card: card string
     :param original_cards: the original cards list
-    :return: total number of cards receievd due to input card
+    :return: total number of cards received due to input card
     """
     total = 0
     current_idx = get_card_id(card)
-    if current_idx in cache:
-        return cache[current_idx]
     n = get_matches(get_winning_numbers(card), get_trial_numbers(card))
     total += n
     if n > 0:
@@ -95,7 +92,6 @@ def analyse_card(card: str, original_cards: List[str]) -> int:
         ]
         for new_card in new_cards:
             total += analyse_card(new_card, original_cards)
-    cache[current_idx] = total
     return total
 
 
@@ -105,7 +101,7 @@ def count_cards(data: List[str]) -> int:
     :param data: input starter cards
     :return: total number of cards
     """
-    original_cards = data.copy()
+    original_cards = tuple(data.copy())
     totals = []
     for card in tqdm.tqdm(data):
         card_total = analyse_card(card, original_cards)
