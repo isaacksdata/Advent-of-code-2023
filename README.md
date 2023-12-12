@@ -24,3 +24,8 @@ solution does not feel optimal but it completes the problem in ~6ms.
 ## Day 6
 
 Part A - very easy
+Part B - similar to the day 5 puzzle in that it is not feasible to perform the part A solution on the larger scale
+problem posed by part B. Similarly the solution here is to use ranges - the large number can be split into buckets
+with each bucket representing a sub range within the big number. Once the assumption is realised that all values
+within a bucket will be the same if start and end of bucket are equal then we only have to find the buckets where
+start != end and then do a detailed iteration over these buckets - massively reducing the computation time.
