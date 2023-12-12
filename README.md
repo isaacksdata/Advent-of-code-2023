@@ -20,3 +20,7 @@ to iterate over all numbers between the massive ranges described in the real dat
 statement - that I needed to map ranges rather than individual seed IDs but delivering a solution which worked
 consistently took multiple attempts and several hours of debugging and walking through mappings. My working
 solution does not feel optimal but it completes the problem in ~6ms.
+
+## Day 6
+
+Part A - very easy
