@@ -38,3 +38,7 @@ complex custom sorting functions.
 Part B - easy to write the initial logic to handle jokers. Ran into a couple of edge cases such as when jokers
 were the only pair etc. Interesting use of `functools.partial` to provide arguments to the custom sorting
 function used in part A.
+
+## Day 8
+
+Part A - simple dictionary to map between nodes
