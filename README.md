@@ -29,3 +29,9 @@ problem posed by part B. Similarly the solution here is to use ranges - the larg
 with each bucket representing a sub range within the big number. Once the assumption is realised that all values
 within a bucket will be the same if start and end of bucket are equal then we only have to find the buckets where
 start != end and then do a detailed iteration over these buckets - massively reducing the computation time.
+
+## Day 7
+
+Part A - fairly easy, a couple of interesting sort problems which could be solved using custom
+sort functions. I had not come across `functools.cmp_to_key` before which was useful when you need
+complex custom sorting functions.
