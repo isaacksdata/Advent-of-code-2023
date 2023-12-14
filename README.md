@@ -38,3 +38,11 @@ complex custom sorting functions.
 Part B - easy to write the initial logic to handle jokers. Ran into a couple of edge cases such as when jokers
 were the only pair etc. Interesting use of `functools.partial` to provide arguments to the custom sorting
 function used in part A.
+
+## Day 8
+
+Part A - simple dictionary to map between nodes
+Part B - Quickly apparent that more was required than to just follow multiple nodes and break the while loop when all
+are at an end node. I spent a while on this puzzle trying to understand where the shortcut might be. I eventually
+stumbled on the oscillation behaviour of the paths by tracking the indices of end_nodes along each path. Once I
+realised this pattern, then some basic number theory formulas could help to find the right answer.
