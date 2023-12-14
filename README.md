@@ -50,3 +50,4 @@ realised this pattern, then some basic number theory formulas could help to find
 ## Day 9
 
 Part A - use `np.diff` iteratively
+Part B - just add an option to predict previous rather than next

@@ -28,28 +28,37 @@ def get_gradients(reading: List[int]) -> List[List[int]]:
     return gradients
 
 
-def predict_next_value(gradients: List[List[int]]) -> int:
+def predict_value(gradients: List[List[int]], predict_next: bool = True) -> int:
     """
     Predict the next measurement by adding the below gradient to the previous number in each gradient
     :param gradients: input list of gradients
+    :param predict_next: If True then predict next number in sequence, else predict previous
     :return: gradients with next value predicted
     """
     for i, grad in enumerate(gradients):
         if i == 0:
-            grad.append(0)
+            if predict_next:
+                grad.append(0)
+            else:
+                grad.insert(0, 0)
         else:
-            grad.append(grad[-1] + gradients[i - 1][-1])
-    return gradients[-1][-1]
+            if predict_next:
+                grad.append(grad[-1] + gradients[i - 1][-1])
+            else:
+                grad.insert(0, grad[0] - gradients[i - 1][0])
+    idx = -1 if predict_next else 0
+    return gradients[-1][idx]
 
 
-def predict_next_values(data: List[str]) -> List[int]:
+def predict_next_values(data: List[str], predict_next: bool = True) -> List[int]:
     """
     Predict the next value for each sequence
     :param data: input data
+    :param predict_next: If True then predict next number in sequence, else predict previous
     :return: predicted values
     """
     readings = get_readings(data)
-    return [predict_next_value(get_gradients(reading)) for reading in readings]
+    return [predict_value(get_gradients(reading), predict_next) for reading in readings]
 
 
 def solve(data: List[str], part: str = "a") -> int:
@@ -62,4 +71,4 @@ def solve(data: List[str], part: str = "a") -> int:
     if part == "a":
         return sum(predict_next_values(data))
     else:
-        return 1
+        return sum(predict_next_values(data, predict_next=False))
