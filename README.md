@@ -46,3 +46,7 @@ Part B - Quickly apparent that more was required than to just follow multiple no
 are at an end node. I spent a while on this puzzle trying to understand where the shortcut might be. I eventually
 stumbled on the oscillation behaviour of the paths by tracking the indices of end_nodes along each path. Once I
 realised this pattern, then some basic number theory formulas could help to find the right answer.
+
+## Day 9
+
+Part A - use `np.diff` iteratively
