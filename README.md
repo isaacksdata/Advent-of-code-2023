@@ -51,3 +51,9 @@ realised this pattern, then some basic number theory formulas could help to find
 
 Part A - use `np.diff` iteratively.
 Part B - just add an option to predict previous rather than next
+
+## Day 10
+
+Part A - took me quite a while to implement the solution correctly even though I knew what the correct approach should
+be. A few corner cases caused trouble in correctly determining the end point of the loop such as multiple possible next
+steps along one arm of the loop being able to access the same co-ordinate.
