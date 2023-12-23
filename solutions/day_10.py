@@ -297,7 +297,53 @@ def count_interior(arr: np.ndarray) -> np.ndarray:
     return cleaned_array
 
 
-def solve(data: List[str], part: str = "a", return_array: bool = False) -> int:
+def shoelace_theorem(vertices: List[Tuple[int, int]]) -> float:
+    """
+    Use the Shoelace Theorem to calculate the area of a polygon using its vertices.
+
+    The area (A) of a polygon with vertices (x1, y1), (x2, y2), ..., (xn, yn) is given by:
+
+    A = 0.5 * |x1y2 + x2y3 + ... + xn*y1 - x2y1 - x3y2 - ... - x1yn|
+
+    This formula pairs consecutive vertices and sums the products of their coordinates,
+    then calculates the absolute difference between the two accumulated sums and divides
+    by 2 to obtain the area of the polygon.
+    :param vertices: the known vertices of the polygon
+    :return: the area of the polygon
+    """
+    n = len(vertices)
+    area = 0.0
+
+    for i in range(n - 1):
+        area += vertices[i][0] * vertices[i + 1][1]
+        area -= vertices[i + 1][0] * vertices[i][1]
+
+    # Add the contribution of the last edge
+    area += vertices[n - 1][0] * vertices[0][1]
+    area -= vertices[0][0] * vertices[n - 1][1]
+
+    # Take the absolute value and divide by 2
+    area = abs(area) / 2.0
+
+    return area
+
+
+def picks_theorem(b: int, area: Union[float, int]) -> int:
+    """
+    This function determines the number of interior lattice points from the number of boundary points
+    and the area of the polygon.
+
+    A = I + B/2 - 1
+    where A is the area of the polygon, B is the number of boundary points and I is the number of interior lattice
+    points
+    :param b: number of boundary points
+    :param area: area of the polygon
+    :return: number of interior lattice points
+    """
+    return int(area + 1 - (b / 2))
+
+
+def solve(data: List[str], part: str = "a") -> int:
     """
     Solve the problem for day 1
     :param data: input data
@@ -308,58 +354,5 @@ def solve(data: List[str], part: str = "a", return_array: bool = False) -> int:
         return find_n_steps(data)
     else:
         _, map_arr, step_history = find_steps(data)
-        maze = make_maze_quick(map_arr, step_history)
-        final_arr = count_interior(maze)
-        return np.sum(final_arr) / 9
-
-
-# if __name__ == "__main__":
-#     test_data = [
-#         "...........",
-#         ".S-------7.",
-#         ".|F-----7|.",
-#         ".||.....||.",
-#         ".||.....||.",
-#         ".|L-7.F-J|.",
-#         ".|..|.|..|.",
-#         ".L--J.L--J.",
-#         "...........",
-#     ]
-#     # test_data = [
-#     #     ".F----7F7F7F7F-7....",
-#     #     ".|F--7||||||||FJ....",
-#     #     ".||.FJ||||||||L7....",
-#     #     "FJL7L7LJLJ||LJ.L-7..",
-#     #     "L--J.L7...LJS7F-7L7.",
-#     #     "....F-J..F7FJ|L7L7L7",
-#     #     "....L7.F7||L7|.L7L7|",
-#     #     ".....|FJLJ|FJ|F7|.LJ",
-#     #     "....FJL-7.||.||||...",
-#     #     "....L---J.LJ.LJLJ..."
-#     # ]
-#     test_data = [
-#         "FF7FSF7F7F7F7F7F---7",
-#         "L|LJ||||||||||||F--J",
-#         "FL-7LJLJ||||||LJL-77",
-#         "F--JF--7||LJLJ7F7FJ-",
-#         "L---JF-JLJ.||-FJLJJ7",
-#         "|F|F-JF---7F7-L7L|7|",
-#         "|FFJF7L7F-JF7|JL---7",
-#         "7-L-JL7||F7|L7F-7F7|",
-#         "L.L7LFJ|||||FJL7||LJ",
-#         "L7JLJL-JLJLJL--JLJ.L",
-#     ]
-#
-#     # from solutions.utilities import (
-#     #     get_puzzle,
-#     #     submit_answer,
-#     #     save_sample_data,
-#     #     format_input_data,
-#     # )
-#     # data = get_puzzle(year=2023, day=10)
-#     # test_data = format_input_data(data)
-#     _, map_arr, step_history = solve(test_data, "a", True)
-#     # binarise(map_arr)
-#     maze = make_maze_quick(map_arr, step_history)
-#     final_arr = count_interior(maze)
-#     print(np.sum(final_arr) / 9)
+        coords = [*step_history[0], *list(reversed(step_history[1]))]
+        return picks_theorem(len(set(coords)), shoelace_theorem(coords))

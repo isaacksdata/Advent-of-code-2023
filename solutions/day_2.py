@@ -97,4 +97,4 @@ def solve(data: List[str], colour_limits: Dict[str, int], part: str = "a") -> in
         powers = [calculate_game_power(game) for game in data]
         return sum(powers)
     else:
-        raise ValueError("Unexpected part!")
+        raise ValueError(f"Unexpected part {part}!")

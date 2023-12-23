@@ -66,3 +66,4 @@ spent a bit of time looking for a more efficient solution and realised that I sh
 from part A of the problem so that I could then iterate along the list of coordinates without having to do any logic to
 check that the next coordinate is the right one. This got the time down to \<50ms!
 Might be fun to try the Shoelace algorithm with Picks Theorem.
+Theorem approach comes out marginally quicker.
