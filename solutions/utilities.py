@@ -1,4 +1,7 @@
 import os
+import timeit
+from typing import Any
+from typing import Callable
 from typing import List
 
 from aocd import get_data
@@ -69,3 +72,9 @@ def format_input_data(data: str) -> List[str]:
     :return: data separated into lines
     """
     return data.splitlines()
+
+
+def run_and_measure(func: Callable, args: List[Any], n: int) -> float:
+    total_time = timeit.timeit(lambda: func(*args), number=n)
+    average_time = total_time / n
+    return average_time

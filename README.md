@@ -51,3 +51,19 @@ realised this pattern, then some basic number theory formulas could help to find
 
 Part A - use `np.diff` iteratively.
 Part B - just add an option to predict previous rather than next
+
+## Day 10
+
+Part A - took me quite a while to implement the solution correctly even though I knew what the correct approach should
+be. A few corner cases caused trouble in correctly determining the end point of the loop such as multiple possible next
+steps along one arm of the loop being able to access the same co-ordinate.
+Part B - this one took me a while - for a while I did not really have an idea of how to handle the gaps between pipes.
+After a few hours of playing around, I decided to try expanding the array 3x so that the gaps between pipes could
+be represented by a an entry in the array. Then I would be able to use a flood-fill from the edges to discount these
+spaces. Even once I had this idea, it took me a while to get a working implementation. My first working attempt was to
+re-walk the maze and map onto the 3x array - but this took nearly 30s to successfully solve the real puzzle. I then
+spent a bit of time looking for a more efficient solution and realised that I should simply track a list of coordinates
+from part A of the problem so that I could then iterate along the list of coordinates without having to do any logic to
+check that the next coordinate is the right one. This got the time down to \<50ms!
+Might be fun to try the Shoelace algorithm with Picks Theorem.
+Theorem approach comes out marginally quicker.
