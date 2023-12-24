@@ -67,3 +67,10 @@ from part A of the problem so that I could then iterate along the list of coordi
 check that the next coordinate is the right one. This got the time down to \<50ms!
 Might be fun to try the Shoelace algorithm with Picks Theorem.
 Theorem approach comes out marginally quicker.
+
+## Day 11
+
+Part A -> easy, just format the array, pair of up the labels and find Euclidean distance
+Part B -> not feasible to insert millions of rows/cols into an array - so needed a way of knowing how many
+empty rows/cols would be found between g1 and g2 and then just multiplying by the scaling factor to find
+the real coordinates - then just get Euclidean distance again.
