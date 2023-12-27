@@ -138,8 +138,3 @@ def solve(data: List[str], part: str = "a") -> int:
         return get_total_possible_combinations(data, part="a")
     else:
         return get_total_possible_combinations(data, part="b")
-
-
-if __name__ == "__main__":
-    s = "??kdkmnjkrn?"
-    generate_possibilities(s)
