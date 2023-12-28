@@ -81,3 +81,11 @@ Part A - can brute force through all possible solutions and find matches
 Part B - now cannot brute force as too many possibilities. Spent a long time on this part,
 I knew i needed to use recursion and caching (dynamic programming) but took a while to find
 where the recursion needed to be implemented.
+
+## Day 13
+
+Part A - Simple enough, find possible mirror lines where neighbouring rows/cols are equal and then
+iterate towards the edges until it fails or reach an edge.
+
+Part B - nothing special needed here - just find potential smudge points by nearly equal rows/cols and then check
+the answer of each possible smudge location to see if it gives a different mirror line.
