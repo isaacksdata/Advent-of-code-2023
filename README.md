@@ -74,3 +74,10 @@ Part A -> easy, just format the array, pair of up the labels and find Euclidean 
 Part B -> not feasible to insert millions of rows/cols into an array - so needed a way of knowing how many
 empty rows/cols would be found between g1 and g2 and then just multiplying by the scaling factor to find
 the real coordinates - then just get Euclidean distance again.
+
+## Day 12
+
+Part A - can brute force through all possible solutions and find matches
+Part B - now cannot brute force as too many possibilities. Spent a long time on this part,
+I knew i needed to use recursion and caching (dynamic programming) but took a while to find
+where the recursion needed to be implemented.
