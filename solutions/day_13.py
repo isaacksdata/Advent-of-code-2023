@@ -38,7 +38,7 @@ def format_puzzle(puzzle_data: List[str]) -> np.ndarray:
     return np.array([list(l) for l in puzzle_data])
 
 
-def find_vertical_mirror(puzzle: np.ndarray) -> Optional[int]:
+def find_vertical_mirror(puzzle: np.ndarray, old_ans: Optional[int] = None) -> Optional[int]:
     """
     Find a vertical mirror in the puzzle input
 
@@ -46,6 +46,7 @@ def find_vertical_mirror(puzzle: np.ndarray) -> Optional[int]:
 
     If no mirror line is found then return None
     :param puzzle: input puzzle
+    :param old_ans: a previous answer which the real answer cannot be equal to
     :return: index of the column to the left of the line or None
     """
     mirror_line = None
@@ -69,6 +70,9 @@ def find_vertical_mirror(puzzle: np.ndarray) -> Optional[int]:
                     pass
             if mirror_line is None:
                 continue  # check for another possible mirror line
+            elif old_ans is not None and mirror_line == old_ans - 1:
+                mirror_line = None
+                continue
             else:
                 break
     return mirror_line
@@ -84,7 +88,7 @@ def check_equal(x: np.ndarray, y: np.ndarray) -> bool:
     return bool(np.all(x == y))
 
 
-def find_horizontal_mirror(puzzle: np.ndarray) -> Optional[int]:
+def find_horizontal_mirror(puzzle: np.ndarray, old_ans: Optional[int] = None) -> Optional[int]:
     """
     Find a horizontal mirror in the puzzle input
 
@@ -92,6 +96,7 @@ def find_horizontal_mirror(puzzle: np.ndarray) -> Optional[int]:
 
     If no mirror line is found then return None
     :param puzzle: input puzzle
+    :param old_ans: a previous answer which the real answer cannot be equal to
     :return: index of the row above the line or None
     """
     mirror_line = None
@@ -115,23 +120,29 @@ def find_horizontal_mirror(puzzle: np.ndarray) -> Optional[int]:
                     pass
             if mirror_line is None:
                 continue
+            elif old_ans is not None and mirror_line == (old_ans / 100) - 1:
+                mirror_line = None
+                continue
             else:
                 break
     return mirror_line
 
 
-def solve_puzzle(puzzle: np.ndarray) -> int:
+def solve_puzzle(puzzle: np.ndarray, old_ans: Optional[int] = None) -> int:
     """
     Solve a given puzzle by finding either a vertical or horizontal mirror line
 
     The answer should be the number of cols to left or number of rows (*100) above the mirror line
     If no mirror line is found then should return 0
     :param puzzle: input puzzle
+    :param old_ans: a previous answer which the real answer cannot be equal to
     :return: answer for the puzzle
     """
-    vm = find_vertical_mirror(puzzle)
+    vm = find_vertical_mirror(puzzle, old_ans)
+    if old_ans is not None and vm is not None:
+        vm = None if vm + 1 == old_ans else vm
     if vm is None:
-        hm = find_horizontal_mirror(puzzle)
+        hm = find_horizontal_mirror(puzzle, old_ans)
         if hm is None:
             answer = 0
         else:
@@ -139,6 +150,52 @@ def solve_puzzle(puzzle: np.ndarray) -> int:
     else:
         answer = vm + 1
     return answer
+
+
+def correct_smudge(puzzle: np.ndarray) -> int:
+    """
+    A smudge on the mirror which causes a different reflection line to be found - find the line after smudge correction
+
+    Iterate over columns and rows to find possible indices for the smudge:
+    These must be in a row or column which is different from another row/column in only one position
+    Then iterate over the indices, do the replacement and find the one which gives a new position for the mirror
+
+    :param puzzle: input puzzle
+    :return: answer
+    """
+    # get the original answer for comparison
+    first_ans = solve_puzzle(puzzle)
+
+    # get a list of possible indices for the smudge
+    idx = []
+    # based on columns
+    for i in range(puzzle.shape[0]):
+        for j in range(i, puzzle.shape[0]):
+            c1 = puzzle[i, :]
+            c2 = puzzle[j, :]
+            if np.sum(c1 == c2) == len(c1) - 1:
+                col_id = int(np.argwhere(c1 != c2)[0][0])
+                idx.extend([(i, col_id), (j, col_id)])
+
+    # based on rows
+    for i in range(puzzle.shape[1]):
+        for j in range(i, puzzle.shape[1]):
+            c1 = puzzle[:, i]
+            c2 = puzzle[:, j]
+            if np.sum(c1 == c2) == len(c1) - 1:
+                row_id = int(np.argwhere(c1 != c2)[0][0])
+                idx.extend([(row_id, i), (row_id, j)])
+
+    # find the solution for each possible index
+    ans = []
+    for i, j in idx:
+        replacement = "." if puzzle[i, j] == "#" else "#"
+        p = puzzle.copy()
+        p[i, j] = replacement
+        a = solve_puzzle(p, old_ans=first_ans)
+        if a > 0 and a != first_ans:
+            ans.append(a)
+    return [a for a in ans if a > 0 & a != first_ans][0]
 
 
 def solve(data: List[str], part: str = "a") -> int:
@@ -152,54 +209,5 @@ def solve(data: List[str], part: str = "a") -> int:
         puzzles = extract_puzzles(data)
         return sum([solve_puzzle(format_puzzle(p)) for p in puzzles])
     else:
-        return 1
-
-
-# if __name__ == "__main__":
-#     test_data = [
-#         "#.##..##.",
-#         "..#.##.#.",
-#         "##......#",
-#         "##......#",
-#         "..#.##.#.",
-#         "..##..##.",
-#         "#.#.##.#.",
-#         "",
-#         "#...##..#",
-#         "#....#..#",
-#         "..##..###",
-#         "#####.##.",
-#         "#####.##.",
-#         "..##..###",
-#         "#....#..#",
-#     ]
-#
-#     from solutions.utilities import (
-#         get_puzzle,
-#         submit_answer,
-#         save_sample_data,
-#         format_input_data,
-#         run_and_measure,
-#     )
-#     data = get_puzzle(year=2023, day=13)
-#     test_data = format_input_data(data)
-#
-#     p = ['....#...####..#',
-#  '.###.....####.#',
-#  '###.#.##..#.#..',
-#  '#.#.######...#.',
-#  '#.#####.#..#.#.',
-#  '...#......#.##.',
-#  '####....#......',
-#  '#.#..#..#####.#',
-#  '##..#.##...#.##',
-#  '...#.#.###.###.',
-#  '..####.##...#.#',
-#  '..####.##...#.#',
-#  '...#.#..##.###.',
-#  '...#.#..##.###.',
-#  '..####.##...#.#',
-#  '..####.##...#.#',
-#  '...#.#.###.###.']
-#     solve_puzzle(format_puzzle(p))
-#     solve(test_data)
+        puzzles = extract_puzzles(data)
+        return sum([correct_smudge(format_puzzle(p)) for p in puzzles])
