@@ -89,3 +89,12 @@ iterate towards the edges until it fails or reach an edge.
 
 Part B - nothing special needed here - just find potential smudge points by nearly equal rows/cols and then check
 the answer of each possible smudge location to see if it gives a different mirror line.
+
+## Day 14
+
+Part A - straightforward - just write a function to move round rocks towards top
+
+Part B - more difficult - first implemented the brute force solution which estimated to run in 200hrs.
+Next tried caching which brought it down to 3hrs. Suggested to me that there might be some cycling going on. So i
+checked for a cycle and sure enough this was the fast way to get the answer. Iterate until you find a previous state
+and this is then the start of the loop. Trivial to then find final array state.
