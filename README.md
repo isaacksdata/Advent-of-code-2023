@@ -98,3 +98,9 @@ Part B - more difficult - first implemented the brute force solution which estim
 Next tried caching which brought it down to 3hrs. Suggested to me that there might be some cycling going on. So i
 checked for a cycle and sure enough this was the fast way to get the answer. Iterate until you find a previous state
 and this is then the start of the loop. Trivial to then find final array state.
+
+## Day 15
+
+Part A - easy
+
+Part B - trivial logic to organise the lenses into boxes.
