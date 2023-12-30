@@ -27,7 +27,7 @@ def trace_beam(
     energised: List[List[int]] = []
 
     # this check is to avoid tracking positions with negative indices
-    if np.all([x >= 0 for x in current_pos]):
+    if np.all([0 <= x < d for x, d in zip(current_pos, arr.shape)]):
         energised.append(current_pos)
 
     # begin following the beam
@@ -117,19 +117,37 @@ def trace_beam(
     return energised
 
 
-def find_energised_locations(arr: np.ndarray) -> int:
+def find_energised_locations(arr: np.ndarray, current_pos: List[int], next_pos: List[int]) -> int:
     """
     Follow all the beams and then count up the number of energised blocks
     :param arr: the map
     :return: number of energised blocks
     """
-    a = trace_beam(arr, [0, -1], [0, 0], [])
+    a = trace_beam(arr, current_pos, next_pos, [])
     empty = np.zeros_like(arr)
     mask = np.isin(empty, [""])
     empty = np.where(mask, "0", empty)
     for c in a:
         empty[c[0], c[1]] = 1
     return int(np.sum(empty.astype("uint8")))
+
+
+def find_best_starting_position(arr: np.ndarray) -> int:
+    """
+    Find the best starting position by positioning the start of the initial beam at every place outside the array
+    :param arr: the map
+    :return: maximum number of energised squares
+    """
+    h, w = arr.shape
+    # collect all the possible start points
+    top_and_down = [([-1, i], [0, i]) for i in range(w)]
+    bottom_and_up = [([h, i], [h - 1, i]) for i in range(w)]
+    left_to_right = [([i, -1], [i, 0]) for i in range(h)]
+    right_to_left = [([i, w], [i, w - 1]) for i in range(h)]
+    starting_pos = [*top_and_down, *bottom_and_up, *left_to_right, *right_to_left]
+    # iterate over all the possible start points
+    ns = [find_energised_locations(arr, s, n) for s, n in starting_pos]
+    return max(ns)
 
 
 def solve(data: List[str], part: str = "a") -> int:
@@ -139,42 +157,8 @@ def solve(data: List[str], part: str = "a") -> int:
     :param part: which part of the problem to solve - 'a' or 'b'
     :return: solution
     """
+    arr = np.array([list(line.lstrip()) for line in data])
     if part == "a":
-        arr = np.array([list(line.lstrip()) for line in data])
-        return find_energised_locations(arr)
+        return find_energised_locations(arr, current_pos=[0, -1], next_pos=[0, 0])
     else:
-        return 1
-
-
-# if __name__ == "__main__":
-# pattern = r"""
-# .|...\....
-# |.-.\.....
-# .....|-...
-# ........|.
-# ..........
-# .........\
-# ..../.\\..
-# .-.-/..|..
-# .|....-|.\
-# ..//.|....
-# """
-#
-# # Split the pattern into lines
-# lines = pattern.strip().split("\n")
-#
-# # Create a numpy array from the lines
-# array = np.array([list(line.lstrip()) for line in lines])
-#
-# a = find_energised_locations(array)
-
-# from solutions.utilities import (
-#     get_puzzle,
-#     submit_answer,
-#     save_sample_data,
-#     format_input_data,
-#     run_and_measure,
-# )
-# data = get_puzzle(year=2023, day=16)
-# data = format_input_data(data)
-# solve(data, "a")
+        return find_best_starting_position(arr)

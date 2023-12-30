@@ -104,3 +104,11 @@ and this is then the start of the loop. Trivial to then find final array state.
 Part A - easy
 
 Part B - trivial logic to organise the lenses into boxes.
+
+## Day 16
+
+Part A - tricky to get all the logic implemented for handling the different objects in the map. I went with recursion
+recursion to analyse all of the new beams produced during analysis.
+
+Part B - brute forced across all of the possible start points - could be speeded up by passing on information about
+internal beams.
