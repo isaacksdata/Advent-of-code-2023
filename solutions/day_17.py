@@ -162,8 +162,7 @@ def find_path(arr: np.ndarray, pos: List[int], total: int = 0) -> int:
     starter = Pointer(pos=pos, directions=[], total=total)
     frontier.put((0, starter))
     came_from: Dict[Tuple[Tuple[int, ...], Optional[str], int], Any] = {(tuple(pos), "", 0): None}
-    cost_so_far: Dict[Tuple[Tuple[int, ...], Optional[str], int], int] = dict()
-    cost_so_far[(tuple(pos), "", 0)] = 0
+    cost_so_far: Dict[Tuple[Tuple[int, ...], Optional[str], int], int] = {(tuple(pos), "", 0): 0}
 
     end = [i - 1 for i in arr.shape]  # bottom right corner
 
