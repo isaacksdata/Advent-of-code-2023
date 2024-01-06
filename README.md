@@ -112,3 +112,15 @@ recursion to analyse all of the new beams produced during analysis.
 
 Part B - brute forced across all of the possible start points - could be speeded up by passing on information about
 internal beams.
+
+## Day 17
+
+Part A - took forever! I figured I either needed Djikstra or recursion. I started with a recursive solution but could
+not seem to get it to work. I then started implementing Djikstra's algorithm with a prioity queue - I had not really
+come across this stuff before so spent some time reading and understanding. Ended up implementing the A\* algorithm
+whereby the priority of the next pointer in the queue is determined by the cost and the distance to the
+goal. A\* should be used where there is only one end point. The tricky part was then
+modifying the algorithm to account for the constraints on consecutative moves etc and how to correctly
+track state to account for this.
+
+Part B - once part A was working, it was relativley littel work to get Part B
