@@ -124,3 +124,16 @@ modifying the algorithm to account for the constraints on consecutative moves et
 track state to account for this.
 
 Part B - once part A was working, it was relativley littel work to get Part B
+
+## Day 18
+
+Part A - trivial to implement logic for the instructions and create an array which could be manipulated with ndimage.
+
+Part B - part A solution is now not feasible due to huge size of array. A similar problem was solved on day 10 using
+Shoelace and Pick theorems.
+
+## Day 19
+
+Part A - easy, some fun with dynamically generating functions from the workflow strings.
+
+Part B - took a bit of thinking about to implement a recursive solution to solve all ranges of values.
