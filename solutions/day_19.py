@@ -123,7 +123,8 @@ class AbstractPipeline(ABC):
     def __init__(self, config: str, part: str) -> None:
         """
         Initialise the pipeline with a config string
-        :param config:
+        :param config: config describes the operations in the pipeline as a string
+        :param part: which part of the puzzle is being solved
         """
         self.config: str = config
         self.part: str = part
@@ -170,7 +171,7 @@ class AbstractPipeline(ABC):
 
 class Pipeline_A(AbstractPipeline):
     """
-    A class for handling a pipeline
+    A class for handling a pipeline for part A of the puzzle
     """
 
     def execute(self, obj: Dict[str, int]) -> str:
@@ -196,9 +197,9 @@ class Pipeline_B(AbstractPipeline):
 
     def execute(self, obj: Dict[str, int]) -> List[Tuple[str, Dict[str, List[int]]]]:
         """
-        Iterate over the operations for this pipeline until an answer is reached which is not None
+        Iterate over the operations for this pipeline until an answer is reached which is not None for all ranges
         :param obj: the object to perform operations on
-        :return: answer
+        :return: results
         """
         if self.operations is None:
             raise ValueError("Operations not initialised!")
