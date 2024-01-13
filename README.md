@@ -137,3 +137,12 @@ Shoelace and Pick theorems.
 Part A - easy, some fun with dynamically generating functions from the workflow strings.
 
 Part B - took a bit of thinking about to implement a recursive solution to solve all ranges of values.
+
+## Day 20
+
+Part A - easy enough once I had written the logic for each time of module
+
+Part B - I tried a few incorrect solutions such as caching (involved hashing the modules). This still took a
+very long time so i figured there must be some kind of loop and sure enough the
+penultimate module turns out to be conjunction with a cycle of memory. So finding the cycle time of
+each input in the memory gets the answer.

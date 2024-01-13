@@ -1,3 +1,4 @@
+import math
 from abc import ABC
 from abc import abstractmethod
 from collections import deque
@@ -18,6 +19,7 @@ class Module(ABC):
     def __init__(self, name: str, targets: List[str]) -> None:
         """
         Initialise the Module
+
         :param name: name of the module
         :param targets: targets of the module
         """
@@ -28,6 +30,7 @@ class Module(ABC):
     def validate_pulse(pulse: int) -> bool:
         """
         Validate that a pulse is valid
+
         :param pulse: the pulse
         :return: True if valid
         """
@@ -45,9 +48,12 @@ class FlipFlop(Module):
     Flip flop modules do nothing for high input pulses, and flip between ON and OFF states for low pulses
     """
 
+    TYPE = "%"
+
     def __init__(self, name: str, targets: List[str]) -> None:
         """
         Initialise the Module
+
         :param name: name of the module
         :param targets: targets of the module
         """
@@ -57,6 +63,7 @@ class FlipFlop(Module):
     def process(self, pulse: int, input_name: str) -> Optional[int]:
         """
         Process the input pulse and emit a response pulse
+
         :param pulse: input pulse
         :param input_name: name of the input which sent the pulse
         :return: new pulse
@@ -80,9 +87,12 @@ class Conjunction(Module):
     Conjunction modules need the memory to be initiated with all inputs see init_memory()
     """
 
+    TYPE = "&"
+
     def __init__(self, name: str, targets: List[str]) -> None:
         """
         Initialise the Module
+
         :param name: name of the module
         :param targets: targets of the module
         """
@@ -92,6 +102,7 @@ class Conjunction(Module):
     def process(self, pulse: int, input_name: str) -> Optional[int]:
         """
         Process the pulse by checking with memory
+
         :param pulse: input pulse
         :param input_name: name of the input module
         :return: pulse
@@ -111,6 +122,7 @@ class Conjunction(Module):
     def init_memory(self, inputs: List[str]) -> None:
         """
         Initialise the memory with input modules
+
         :param inputs: list of input names
         :return: void
         """
@@ -122,9 +134,12 @@ class Broadcast(Module):
     The broadcast module takes in an input and re-emits teh same signal to targets
     """
 
+    TYPE = "broadcaster"
+
     def process(self, pulse: int, input_name: str) -> Optional[int]:
         """
         Process the input signal
+
         :param pulse: input pulse
         :param input_name: name of the input module
         :return: pulse
@@ -137,9 +152,12 @@ class Button(Module):
     Button is the start of each set of pulses. It always emits a low signal
     """
 
+    TYPE = "button"
+
     def process(self, pulse: int, input_name: str) -> Optional[int]:
         """
         Process the input signal
+
         :param pulse: input pulse
         :param input_name: name of the input module
         :return: pulse
@@ -152,9 +170,12 @@ class Output(Module):
     Output module only receives pulses
     """
 
+    TYPE = "output"
+
     def process(self, pulse: int, input_name: str) -> Optional[int]:
         """
         Process the input signal
+
         :param pulse: input pulse
         :param input_name: name of the input module
         :return: pulse
@@ -164,7 +185,8 @@ class Output(Module):
 
 def module_factory(config: str) -> Module:
     """
-    Create a module instance
+    Create a module instance by parsing and interpreting a config string
+
     :param config: description of the module
     :return: module instance
     """
@@ -187,12 +209,16 @@ def module_factory(config: str) -> Module:
     return mod
 
 
-def press_button(modules: Dict[str, Module], button: Button) -> Tuple[int, int]:
+def press_button(
+    modules: Dict[str, Module], button: Button, output_prev_name: Optional[str] = None
+) -> Tuple[int, int, Dict[str, Module], bool, Optional[str]]:
     """
     Press the button and count number of low and high pulses
+
     :param modules: dictionary of modules
     :param button: the button module
-    :return: n high, n low
+    :param output_prev_name: the name of the module which precedes the output rx
+    :return: n high, n low, True if a low pulse sent to rx
     """
     queue: Deque[Tuple[int, str, str]] = deque()
     pulse = button.process(pulse=0, input_name="")
@@ -202,6 +228,8 @@ def press_button(modules: Dict[str, Module], button: Button) -> Tuple[int, int]:
     queue.append((pulse, target, button.name))
     n_high_beams = 0
     n_low_beams = 0
+    low_rx = False
+    output_prev_tracker = None
     while queue:
         p, t, prev_t = queue.pop()
         if p:
@@ -212,17 +240,23 @@ def press_button(modules: Dict[str, Module], button: Button) -> Tuple[int, int]:
             continue
         m = modules[t]
         new_p = m.process(p, prev_t)
+        if m.name == output_prev_name and isinstance(m, Conjunction) and sum(m.memory.values()) == 1:
+            output_prev_tracker = [k for k, v in m.memory.items() if v == 1][0]
         if new_p is not None:
             for new_t in m.targets:
+                if new_p == 0 and new_t == "rx":
+                    low_rx = True
                 queue.appendleft((new_p, new_t, t))
-    return n_high_beams, n_low_beams
+    return n_high_beams, n_low_beams, modules, low_rx, output_prev_tracker
 
 
-def press_buttons(configs: List[str], n: int) -> int:
+def press_buttons(configs: List[str], n: int, part: str = "a") -> int:
     """
     Press the start button N times and count home many low and high pulses are sent
+
     :param configs: strings describing each pipeline
     :param n: number of times to press the button
+    :param part: the part of puzzle to solve
     :return: n_low * n_high
     """
     module_dict: Dict[str, Module] = {}
@@ -237,16 +271,29 @@ def press_buttons(configs: List[str], n: int) -> int:
         con.init_memory(inputs)
     button = Button(name="button", targets=["broadcaster"])
     total_h, total_l = 0, 0
-    for _ in range(n):
-        n_h, n_l = press_button(module_dict, button)
-        total_h += n_h
-        total_l += n_l
-    return total_h * total_l
+    if part == "a":
+        for _ in range(n):
+            n_h, n_l, low_rx, _, _ = press_button(module_dict, button)
+            total_h += n_h
+            total_l += n_l
+        return total_h * total_l
+    else:
+        i = 0
+        rx_prev = [v for v in module_dict.values() if "rx" in v.targets][0]
+        assert isinstance(rx_prev, Conjunction)  # assume that the penultimate module is a conjunction
+        rx_prev_states = rx_prev.memory.copy()
+        while any([0 in rx_prev_states.values()]):
+            _, _, _, _, resp = press_button(module_dict, button, rx_prev.name)
+            if resp is not None:
+                rx_prev_states[resp] = i + 1
+            i += 1
+        return math.prod(rx_prev_states.values())
 
 
 def solve(data: List[str], part: str = "a") -> int:
     """
     Solve the problem for day 1
+
     :param data: input data
     :param part: which part of the problem to solve - 'a' or 'b'
     :return: solution
@@ -254,27 +301,4 @@ def solve(data: List[str], part: str = "a") -> int:
     if part == "a":
         return press_buttons(data, 1000)
     else:
-        return 1
-
-
-# if __name__ == "__main__":
-#     test_data = ["broadcaster -> a, b, c", "%a -> b", "%b -> c", "%c -> inv", "&inv -> a"]
-#     test_data_2 = [
-#         "broadcaster -> a",
-#         "%a -> inv, con",
-#         "&inv -> b",
-#         "%b -> con",
-#         "&con -> output",
-#     ]
-#
-#     from solutions.utilities import (
-#         get_puzzle,
-#         submit_answer,
-#         save_sample_data,
-#         format_input_data,
-#         run_and_measure,
-#     )
-#     data = get_puzzle(year=2023, day=20)
-#     data = format_input_data(data)
-#
-#     press_buttons(data, 1000)
+        return press_buttons(data, 1000, "b")
